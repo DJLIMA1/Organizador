@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerenciador de Tarefas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #d3d3d3;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    h1 {
+      padding: 20px;
+      font-size: 28px;
+    }
+
+    .task-card {
+      background: #f0f0f0;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 20px;
+      width: 80%;
+      max-width: 400px;
+      position: relative;
+      text-align: left;
+      transition: all 0.3s ease;
+    }
+
+    .urgent {
+      background: #d32f2f;
+      color: white;
+      font-weight: bold;
+      padding: 5px 10px;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+
+    .task-title {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .category {
+      color: #1a73e8;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+
+    .category.escola {
+      color: green;
+    }
+
+    .toggle-description {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+
+    .description {
+      margin-top: 15px;
+      display: none;
+      font-size: 0.95em;
+      color: #444;
+    }
+
+    .description.active {
+      display: block;
+    }
+
+    .delete-btn {
+      background: #d32f2f;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .bottom-menu {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+      background: white;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    .bottom-menu button {
+      background: #34527a;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #nova-tarefa, #configuracoes {
+      padding: 20px;
+    }
+
+    form input, form textarea, form button {
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1em;
+      width: 80%;
+      max-width: 400px;
+    }
+
+    form button {
+      background-color: #34527a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    form button:hover {
+      background-color: #2b4463;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hoje é dia <span id="data-dia"></span></h1>
+
+  <!-- Página Principal -->
+  <div id="main"></div>
+
+  <!-- Nova Tarefa -->
+  <div id="nova-tarefa" class="hidden">
+    <h2>Nova Tarefa</h2>
+    <form id="form-tarefa" onsubmit="criarTarefa(event)">
+      <input type="text" id="titulo" placeholder="Título da tarefa" required /><br>
+      <input type="text" id="categoria" placeholder="Categoria (ex: Trabalho, Escola)" required /><br>
+      <input type="date" id="prazo" /><br>
+      <textarea id="descricao" placeholder="Descrição detalhada"></textarea><br>
+      <button type="submit">Adicionar</button>
+    </form>
+  </div>
+
+  <!-- Configurações -->
+  <div id="configuracoes" class="hidden">
+    <h2>Configurações</h2>
+    <button onclick="limparTarefas()">🗑 Limpar todas as tarefas</button>
+  </div>
+
+  <!-- Menu inferior -->
+  <div class="bottom-menu">
+    <button onclick="mostrarAba('main')">📅</button>
+    <button onclick="mostrarAba('nova-tarefa')">＋</button>
+    <button onclick="mostrarAba('configuracoes')">⚙️</button>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("data-dia").textContent = new Date().getDate();
+      carregarTarefas();
+    });
+
+    function mostrarAba(aba) {
+      document.getElementById("main").classList.add("hidden");
+      document.getElementById("nova-tarefa").classList.add("hidden");
+      document.getElementById("configuracoes").classList.add("hidden");
+      document.getElementById(aba).classList.remove("hidden");
+    }
+
+    function criarTarefa(event) {
+      event.preventDefault();
+      const titulo = document.getElementById("titulo").value.trim();
+      const categoria = document.getElementById("categoria").value.trim();
+      const prazo = document.getElementById("prazo").value;
+      const descricao = document.getElementById("descricao").value.trim();
+
+      const novaTarefa = { titulo, categoria, prazo, descricao };
+      const tarefas = JSON.parse(localStorage.getItem("tarefas") || "[]");
+      tarefas.push(novaTarefa);
+      localStorage.setItem("tarefas", JSON.stringify(tarefas));
+
+      adicionarTarefaNaTela(novaTarefa, tarefas.length - 1);
+      document.getElementById("form-tarefa").reset();
+      mostrarAba("main");
+    }
+
+    function adicionarTarefaNaTela(tarefa, index) {
+      const taskCard = document.createElement("div");
+      taskCard.className = "task-card";
+
+      const titleElem = document.createElement("div");
+      titleElem.className = "task-title";
+      titleElem.textContent = tarefa.titulo;
+
+      const catElem = document.createElement("div");
+      catElem.className = "category";
+      catElem.textContent = tarefa.categoria;
+      if (tarefa.categoria.toLowerCase() === "escola") {
+        catElem.classList.add("escola");
+      }
+
+      const toggleBtn = document.createElement("button");
+      toggleBtn.className = "toggle-description";
+      toggleBtn.textContent = "❯";
+      toggleBtn.onclick = () => {
+        descElem.classList.toggle("active");
+      };
+
+      const descElem = document.createElement("div");
+      descElem.className = "description";
+      descElem.innerHTML = tarefa.descricao
+        ? `<p>${tarefa.descricao.replace(/\n/g, "<br>")}</p>`
+        : "<p>Sem descrição.</p>";
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.textContent = "Excluir";
+      deleteBtn.onclick = () => excluirTarefa(index);
+
+      descElem.appendChild(deleteBtn);
+
+      taskCard.appendChild(titleElem);
+      taskCard.appendChild(catElem);
+      taskCard.appendChild(toggleBtn);
+
+      if (tarefa.prazo) {
+        const diasRestantes = calcularDiasRestantes(tarefa.prazo);
+        const prazoElem = document.createElement("div");
+        prazoElem.style.cssText = "position: absolute; right: 15px; bottom: 15px; font-size: 0.8em; color: #666;";
+        prazoElem.textContent = `Restam ${diasRestantes} dia${diasRestantes === 1 ? "" : "s"}.`;
+        taskCard.appendChild(prazoElem);
+      }
+
+      taskCard.appendChild(descElem);
+      document.getElementById("main").appendChild(taskCard);
+    }
+
+    function calcularDiasRestantes(dataPrazo) {
+      const hoje = new Date();
+      const prazo = new Date(dataPrazo);
+      const diff = Math.ceil((prazo - hoje) / (1000 * 60 * 60 * 24));
+      return diff > 0 ? diff : 0;
+    }
+
+    function carregarTarefas() {
+      const tarefas = JSON.parse(localStorage.getItem("tarefas") || "[]");
+      tarefas.forEach((tarefa, index) => adicionarTarefaNaTela(tarefa, index));
+    }
+
+    function excluirTarefa(index) {
+      const tarefas = JSON.parse(localStorage.getItem("tarefas") || "[]");
+      tarefas.splice(index, 1);
+      localStorage.setItem("tarefas", JSON.stringify(tarefas));
+      document.getElementById("main").innerHTML = "";
+      carregarTarefas();
+    }
+
+    function limparTarefas() {
+      if (confirm("Tem certeza que deseja excluir todas as tarefas?")) {
+        localStorage.removeItem("tarefas");
+        document.getElementById("main").innerHTML = "";
+      }
+    }
+  </script>
+</body>
+</html>
