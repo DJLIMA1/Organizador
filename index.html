@@ -27,7 +27,7 @@
       max-width: 400px;
       position: relative;
       text-align: left;
-      transition: all 0.3s ease;
+      transition: all 0.3s ease, height 0.3s ease; /* Suaviza alterações de tamanho */
     }
 
     .urgent {
@@ -59,22 +59,27 @@
       position: absolute;
       right: 10px;
       top: 50%;
-      transform: translateY(-50%);
+      transform: translateY(-50%) rotate(90deg); /* Inicialmente virada para baixo */
       background: white;
       border: none;
       font-size: 1.5em;
       cursor: pointer;
+      transition: transform 0.3s ease; /* Transição suave para a rotação */
     }
 
     .description {
       margin-top: 15px;
-      display: none;
       font-size: 0.95em;
       color: #444;
+      overflow: hidden;
+      max-height: 0; /* Altura inicial 0 */
+      visibility: hidden; /* Torna invisível inicialmente */
+      transition: max-height 0.5s ease-in-out, visibility 0.5s ease; /* Suaviza a transição */
     }
 
     .description.active {
-      display: block;
+      max-height: 500px; /* Altura máxima para expandir */
+      visibility: visible; /* Torna visível quando ativo */
     }
 
     .delete-btn {
@@ -220,6 +225,9 @@
       toggleBtn.textContent = "❯";
       toggleBtn.onclick = () => {
         descElem.classList.toggle("active");
+        toggleBtn.style.transform = descElem.classList.contains("active")
+          ? "translateY(-50%) rotate(0deg)" // Rotação para cima
+          : "translateY(-50%) rotate(90deg)"; // Rotação para baixo
       };
 
       const descElem = document.createElement("div");
@@ -240,10 +248,9 @@
       taskCard.appendChild(toggleBtn);
 
       if (tarefa.prazo) {
-        const diasRestantes = calcularDiasRestantes(tarefa.prazo);
         const prazoElem = document.createElement("div");
         prazoElem.style.cssText = "position: absolute; right: 15px; bottom: 15px; font-size: 0.8em; color: #666;";
-        prazoElem.textContent = `Restam ${diasRestantes} dia${diasRestantes === 1 ? "" : "s"}.`;
+        prazoElem.textContent = calcularDiasRestantes(tarefa.prazo);
         taskCard.appendChild(prazoElem);
       }
 
@@ -254,8 +261,18 @@
     function calcularDiasRestantes(dataPrazo) {
       const hoje = new Date();
       const prazo = new Date(dataPrazo);
+
+      // Calcula a diferença em dias
       const diff = Math.ceil((prazo - hoje) / (1000 * 60 * 60 * 24));
-      return diff > 0 ? diff : 0;
+
+      if (diff > 0) {
+        return `Restam ${diff} dia${diff === 1 ? "" : "s"}.`;
+      } else if (diff === 0) {
+        return "O prazo é hoje!";
+      } else {
+        const diasAtrasados = Math.abs(diff);
+        return `Atrasado há ${diasAtrasados} dia${diasAtrasados === 1 ? "" : "s"}.`;
+      }
     }
 
     function carregarTarefas() {
