@@ -1,0 +1,161 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #d3d3d3;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 30px;
+    font-size: 28px;
+  }
+
+  .task-card {
+    background: #f0f0f0;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 20px;
+    width: 80%;
+    max-width: 400px;
+    position: relative;
+    text-align: left;
+    transition: all 0.3s ease, height 0.3s ease; /* Suaviza alterações de tamanho */
+  }
+
+  .urgent {
+    background: #d32f2f;
+    color: white;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+
+  .task-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .category {
+    color: #1a73e8;
+    font-size: 0.9em;
+    margin-top: 5px;
+  }
+
+  .category.escola {
+    color: green;
+  }
+
+  .toggle-description {
+    position: absolute;
+    right: 20px;
+    top: 55px;
+    transform: translateY(-50%);
+    background: white;
+    border-radius: 50%;
+    border: none;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .toggle-description i {
+    font-size: 1.2em; /* Ajuste o tamanho do ícone */
+    transition: transform 0.3s ease;
+  }
+
+  .description {
+    margin-top: 15px;
+    font-size: 0.95em;
+    color: #444;
+    overflow: hidden;
+    max-height: 0; /* Altura inicial 0 */
+    visibility: hidden; /* Torna invisível inicialmente */
+    transition: max-height 0.5s ease-in-out, visibility 0.5s ease; /* Suaviza a transição */
+  }
+
+  .description.active {
+    max-height: 500px; /* Altura máxima para expandir */
+    visibility: visible; /* Torna visível quando ativo */
+  }
+
+  .delete-btn {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .bottom-menu {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    background: white;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 98.5%;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+    border-radius: 20px 20px 0 0;
+    z-index: 1000;
+    transition: all 0.3s ease;
+  }
+
+  .bottom-menu button {
+    background: #34527a;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    scale: 0.9;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease, scale 0.3s ease;
+  }
+
+  .bottom-menu button:hover{
+    background: #2b4463;
+    scale: 1.05;
+  }
+  .bottom-menu button:active {
+    background: #1e2a4d;
+    scale: 0.9;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  #nova-tarefa, #configuracoes {
+    padding: 20px;
+  }
+
+  form input, form textarea, form button {
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 1em;
+    width: 80%;
+    max-width: 400px;
+  }
+
+  form button {
+    background-color: #34527a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  form button:hover {
+    background-color: #2b4463;
+  }
