@@ -71,6 +71,10 @@ body {
 
   .description {
     margin-top: 15px;
+    background: rgb(203, 203, 203);
+
+    padding: 10px;
+    border-radius: 10px;
     font-size: 0.95em;
     color: #444;
     overflow: hidden;
