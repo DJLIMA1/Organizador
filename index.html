@@ -6,13 +6,16 @@
   <title>Gerenciador de Tarefas</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-
 </head>
 <body>
+  <!-- Título Principal -->
   <h1 id="titulo-principal" class="hidden">Hoje é dia <span id="data-dia"></span></h1>
 
   <!-- Página Principal -->
   <div id="main"></div>
+
+  <!-- Overlay para modais -->
+  <div class="modal-overlay"></div>
 
   <!-- Nova Tarefa -->
   <div id="nova-tarefa" class="hidden">
@@ -22,6 +25,10 @@
       <input type="text" id="categoria" placeholder="Categoria (ex: Trabalho, Escola)" required /><br>
       <input type="date" id="prazo" /><br>
       <textarea id="descricao" placeholder="Descrição detalhada"></textarea><br>
+      <div class="checkbox-container">
+        <input type="checkbox" id="urgente" />
+        <label for="urgente">Marcar como urgente</label>
+      </div>
       <button type="submit">Adicionar</button>
     </form>
   </div>
@@ -30,6 +37,7 @@
   <div id="configuracoes" class="hidden">
     <h2>Configurações</h2>
     <button onclick="limparTarefas()">🗑 Limpar todas as tarefas</button>
+    <button onclick="logoutUser()">🚪 Sair</button>
   </div>
 
   <!-- Menu inferior -->
@@ -39,46 +47,96 @@
     <button onclick="mostrarAba('configuracoes')">⚙️</button>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="auth.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => { // Executa quando a pagina estiver completamente carregada
+    document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("data-dia").textContent = new Date().getDate();
-      carregarTarefas();
       mostrarAba("main");
+      carregarTarefas();
     });
 
     function mostrarAba(aba) {
-      document.getElementById("main").classList.add("hidden");
-      document.getElementById("nova-tarefa").classList.add("hidden");
-      document.getElementById("configuracoes").classList.add("hidden");
-      document.getElementById("titulo-principal").classList.add("hidden"); // Oculta o título por padrão
-
-      document.getElementById(aba).classList.remove("hidden");
-
+      console.log('Mostrando aba:', aba);
+      // Oculta todas as abas primeiro
+      const abas = ["main", "nova-tarefa", "configuracoes"];
+      abas.forEach(a => {
+        const elemento = document.getElementById(a);
+        if (elemento) {
+          elemento.classList.add("hidden");
+        }
+      });
+      document.getElementById("titulo-principal").classList.add("hidden");
+      document.querySelector(".modal-overlay").classList.remove("active");
+      
+      // Mostra a aba selecionada
+      const abaElement = document.getElementById(aba);
+      if (abaElement) {
+        console.log('Elemento da aba encontrado:', abaElement);
+        abaElement.classList.remove("hidden");
+      }
+      
+      // Tratamentos específicos por aba
       if (aba === "main") {
-        document.getElementById("titulo-principal").classList.remove("hidden"); // Exibe o título na aba de tarefas
+        document.getElementById("titulo-principal").classList.remove("hidden");
+        // Recarrega as tarefas quando voltar para a aba principal
+        carregarTarefas();
+      } else if (aba === "nova-tarefa" || aba === "configuracoes") {
+        document.querySelector(".modal-overlay").classList.add("active");
       }
     }
 
     function criarTarefa(event) {
       event.preventDefault();
+      console.log('Iniciando criação de tarefa');
+      
       const titulo = document.getElementById("titulo").value.trim();
       const categoria = document.getElementById("categoria").value.trim();
       const prazo = document.getElementById("prazo").value;
       const descricao = document.getElementById("descricao").value.trim();
+      const urgente = document.getElementById("urgente").checked;
 
-      const novaTarefa = { titulo, categoria, prazo, descricao };
-      const tarefas = JSON.parse(localStorage.getItem("tarefas") || "[]");
-      tarefas.push(novaTarefa);
-      localStorage.setItem("tarefas", JSON.stringify(tarefas));
+      console.log('Dados da nova tarefa:', { titulo, categoria, prazo, descricao, urgente });
 
-      adicionarTarefaNaTela(novaTarefa, tarefas.length - 1);
+      const novaTarefa = { titulo, categoria, prazo, descricao, urgente };
+      
+      // Reseta o formulário
       document.getElementById("form-tarefa").reset();
-      mostrarAba("main");
+      
+      // Carrega tarefas atuais do Firebase, adiciona a nova e salva
+      loadTasks()
+        .then(tarefas => {
+          console.log('Tarefas atuais:', tarefas);
+          const novasTarefas = [...(tarefas || []), novaTarefa];
+          console.log('Novas tarefas a serem salvas:', novasTarefas);
+          return syncTasks(novasTarefas);
+        })
+        .then(() => {
+          console.log('Tarefa criada com sucesso');
+          mostrarAba('main');
+          carregarTarefas();
+        })
+        .catch((error) => {
+          console.error("Erro ao criar tarefa:", error);
+          alert("Erro ao criar tarefa. Por favor, tente novamente.");
+        });
     }
 
     function adicionarTarefaNaTela(tarefa, index) {
       const taskCard = document.createElement("div");
-      taskCard.className = "task-card";
+      const estaAtrasada = verificarSeEstaAtrasada(tarefa.prazo);
+      const ehUrgente = tarefa.urgente || estaAtrasada;
+      
+      taskCard.className = `task-card${ehUrgente ? ' urgente' : ''}`;
+
+      if (ehUrgente) {
+        const urgenteLabel = document.createElement("div");
+        urgenteLabel.className = "urgent";
+        urgenteLabel.textContent = estaAtrasada ? "ATRASADA" : "URGENTE";
+        taskCard.appendChild(urgenteLabel);
+      }
 
       const titleElem = document.createElement("div");
       titleElem.className = "task-title";
@@ -93,15 +151,11 @@
 
       const toggleBtn = document.createElement("button");
       toggleBtn.className = "toggle-description";
-      toggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>'; // Ícone de seta para a direita
+      toggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
       toggleBtn.onclick = () => {
         descElem.classList.toggle("active");
         const icon = toggleBtn.querySelector("i");
-        if (descElem.classList.contains("active")) {
-          icon.style.transform = "rotate(90deg)"; // Rotação para baixo
-        } else {
-          icon.style.transform = "rotate(-90deg)"; // Rotação para a direita
-        }
+        icon.style.transform = descElem.classList.contains("active") ? "rotate(90deg)" : "rotate(0deg)";
       };
 
       const descElem = document.createElement("div");
@@ -120,24 +174,46 @@
       taskCard.appendChild(titleElem);
       taskCard.appendChild(catElem);
       taskCard.appendChild(toggleBtn);
+      taskCard.appendChild(descElem);
 
       if (tarefa.prazo) {
         const prazoElem = document.createElement("div");
-        prazoElem.style.cssText = "position: absolute; right: 15px; bottom: 15px; font-size: 0.8em; color: #666;";
+        prazoElem.className = "prazo-texto";
         prazoElem.textContent = calcularDiasRestantes(tarefa.prazo);
         taskCard.appendChild(prazoElem);
       }
 
-      taskCard.appendChild(descElem);
       document.getElementById("main").appendChild(taskCard);
     }
 
-    function calcularDiasRestantes(dataPrazo) {
+    function verificarSeEstaAtrasada(dataPrazo) {
+      if (!dataPrazo) return false;
+      
+      // Configura as datas para meia-noite no fuso horário do Brasil
       const hoje = new Date();
       const prazo = new Date(dataPrazo);
+      
+      // Ajusta as datas para meia-noite no horário local
+      const hojeInicioDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+      const prazoInicioDia = new Date(prazo.getFullYear(), prazo.getMonth(), prazo.getDate());
+      
+      // Compara apenas as datas (ignorando as horas)
+      return hojeInicioDia > prazoInicioDia;
+    }
 
+    function calcularDiasRestantes(dataPrazo) {
+      if (!dataPrazo) return "";
+      
+      // Configura as datas para meia-noite no fuso horário do Brasil
+      const hoje = new Date();
+      const prazo = new Date(dataPrazo);
+      
+      // Ajusta as datas para meia-noite no horário local
+      const hojeInicioDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+      const prazoInicioDia = new Date(prazo.getFullYear(), prazo.getMonth(), prazo.getDate());
+      
       // Calcula a diferença em dias
-      const diff = Math.ceil((prazo - hoje) / (1000 * 60 * 60 * 24));
+      const diff = Math.floor((prazoInicioDia - hojeInicioDia) / (1000 * 60 * 60 * 24));
 
       if (diff > 0) {
         return `Restam ${diff} dia${diff === 1 ? "" : "s"}.`;
@@ -145,28 +221,61 @@
         return "O prazo é hoje!";
       } else {
         const diasAtrasados = Math.abs(diff);
-        return `Atrasado há ${diasAtrasados} dia${diasAtrasados === 1 ? "" : "s"}.`;
+        return `⚠️ Atrasado há ${diasAtrasados} dia${diasAtrasados === 1 ? "" : "s"}.`;
       }
     }
 
-    function carregarTarefas() {
-      const tarefas = JSON.parse(localStorage.getItem("tarefas") || "[]");
-      tarefas.forEach((tarefa, index) => adicionarTarefaNaTela(tarefa, index));
-    }
-
     function excluirTarefa(index) {
-      const tarefas = JSON.parse(localStorage.getItem("tarefas") || "[]");
-      tarefas.splice(index, 1);
-      localStorage.setItem("tarefas", JSON.stringify(tarefas));
-      document.getElementById("main").innerHTML = "";
-      carregarTarefas();
+      loadTasks()
+        .then(tarefas => {
+          tarefas.splice(index, 1);
+          return syncTasks(tarefas);
+        })
+        .then(() => {
+          document.getElementById("main").innerHTML = "";
+          carregarTarefas();
+        })
+        .catch(error => {
+          console.error("Erro ao excluir tarefa:", error);
+          alert("Erro ao excluir tarefa. Por favor, tente novamente.");
+        });
     }
 
     function limparTarefas() {
       if (confirm("Tem certeza que deseja excluir todas as tarefas?")) {
-        localStorage.removeItem("tarefas");
-        document.getElementById("main").innerHTML = "";
+        syncTasks([])
+          .then(() => {
+            document.getElementById("main").innerHTML = "";
+          })
+          .catch(error => {
+            console.error("Erro ao limpar tarefas:", error);
+            alert("Erro ao limpar tarefas. Por favor, tente novamente.");
+          });
       }
+    }
+
+    function carregarTarefas() {
+      console.log('Iniciando carregamento de tarefas');
+      loadTasks()
+        .then(tarefas => {
+          console.log('Tarefas recebidas:', tarefas);
+          const mainDiv = document.getElementById("main");
+          console.log('Elemento main encontrado:', mainDiv);
+          mainDiv.innerHTML = "";
+          if (Array.isArray(tarefas)) {
+            console.log('Número de tarefas:', tarefas.length);
+            tarefas.forEach((tarefa, index) => {
+              console.log('Adicionando tarefa:', tarefa);
+              adicionarTarefaNaTela(tarefa, index);
+            });
+          } else {
+            console.log('Tarefas não é um array:', tarefas);
+          }
+        })
+        .catch(error => {
+          console.error("Erro ao carregar tarefas:", error);
+          alert("Erro ao carregar tarefas. Por favor, tente novamente.");
+        });
     }
   </script>
 </body>

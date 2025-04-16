@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Gerenciador de Tarefas</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="auth-page">
+  <!-- Container de Autenticação -->
+  <div id="auth-container">
+    <div class="auth-box">
+      <img src="logo.png" alt="Logo" class="auth-logo">
+      
+      <!-- Formulário de Login -->
+      <div id="login-section">
+        <form id="login-form" onsubmit="event.preventDefault(); loginUser(document.getElementById('login-email').value, document.getElementById('login-password').value)">
+          <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="Digite seu email" required />
+          </div>
+          <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="login-password" placeholder="Digite sua senha" required />
+          </div>
+          <a href="#" class="forgot-password">Esqueceu sua senha?</a>
+          <button type="submit" class="auth-button">Entrar</button>
+        </form>
+        <p class="register-text">
+          Ainda não possui conta? 
+          <a href="#" onclick="toggleAuthForms()">Conheça o email da Umbler!</a>
+        </p>
+      </div>
+
+      <!-- Formulário de Registro -->
+      <div id="register-section" class="hidden">
+        <form id="register-form" onsubmit="event.preventDefault(); registerUser(document.getElementById('register-email').value, document.getElementById('register-password').value)">
+          <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="register-email" placeholder="Digite seu email" required />
+          </div>
+          <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="register-password" placeholder="Digite sua senha" required />
+          </div>
+          <button type="submit" class="auth-button">Registrar</button>
+        </form>
+        <p class="register-text">
+          Já possui uma conta? 
+          <a href="#" onclick="toggleAuthForms()">Fazer login</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html> 

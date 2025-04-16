@@ -4,6 +4,7 @@ body {
     margin: 0;
     padding: 0;
     text-align: center;
+    margin-bottom: 100px;
   }
 
   h1 {
@@ -14,22 +15,30 @@ body {
   .task-card {
     background: #f0f0f0;
     margin: 20px auto;
-    padding: 20px;
+    padding: 30px;
     border-radius: 20px;
     width: 80%;
     max-width: 400px;
     position: relative;
     text-align: left;
-    transition: all 0.3s ease, height 0.3s ease; /* Suaviza alterações de tamanho */
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Transição mais suave */
+    overflow: hidden; /* Garante que o conteúdo não vaze durante a animação */
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .task-card.hidden {
+    opacity: 0;
+    transform: translateY(-20px);
   }
 
   .urgent {
-    background: #d32f2f;
+    background: #ff4444;
     color: white;
     font-weight: bold;
     padding: 5px 10px;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    margin: -20px -20px 10px -20px;
+    text-align: center;
   }
 
   .task-title {
@@ -65,27 +74,34 @@ body {
   }
 
   .toggle-description i {
-    font-size: 1.2em; /* Ajuste o tamanho do ícone */
-    transition: transform 0.3s ease;
+    font-size: 1.2em;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .description {
-    margin-top: 15px;
+    clear: both;
     background: rgb(203, 203, 203);
-
-    padding: 10px;
     border-radius: 10px;
     font-size: 0.95em;
     color: #444;
     overflow: hidden;
-    max-height: 0; /* Altura inicial 0 */
-    visibility: hidden; /* Torna invisível inicialmente */
-    transition: max-height 0.5s ease-in-out, visibility 0.5s ease; /* Suaviza a transição */
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    transform-origin: top;
+    transform: translateY(-20px);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
   }
 
   .description.active {
-    max-height: 500px; /* Altura máxima para expandir */
-    visibility: visible; /* Torna visível quando ativo */
+    max-height: 1000px;
+    opacity: 1;
+    padding: 15px;
+    margin-top: 15px;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 
   .delete-btn {
@@ -96,24 +112,26 @@ body {
     margin-top: 10px;
     border-radius: 8px;
     cursor: pointer;
+    opacity: 1; /* Garantir que o botão de excluir sempre fique visível */
   }
 
   .bottom-menu {
     display: flex;
     justify-content: space-around;
-    padding: 10px;
     background: white;
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 98.5%;
+    width: 100%;
     box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
-    border-radius: 20px 20px 0 0;
+    border-radius: 20px 20px 0px 0px;
     z-index: 1000;
     transition: all 0.3s ease;
+  
   }
 
   .bottom-menu button {
+    margin: 10px;
     background: #34527a;
     color: white;
     border: none;
@@ -138,20 +156,60 @@ body {
 
   .hidden {
     display: none;
+  }
 
+  #main {
+    display: block;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  #main.hidden {
+    display: none;
   }
 
   #nova-tarefa, #configuracoes {
-    padding: 20px;
+    padding: 30px;
     background: #f0f0f0;
     border-radius: 20px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    margin: 20px auto;
-    margin-bottom: 100px;
-    width: 80%;
+    margin: 0 auto;
+    width: 90%;
     max-width: 400px;
-    position: relative;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
+    z-index: 100;
+  }
+
+  #titulo-principal {
+    margin: 30px;
+    font-size: 28px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  #titulo-principal.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Fundo escuro quando abrir modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    z-index: 90;
+  }
+
+  .modal-overlay.active {
+    display: block;
   }
 
   form input, form textarea, form button {
@@ -160,6 +218,13 @@ body {
     font-size: 1em;
     width: 80%;
     max-width: 400px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  form textarea {
+    min-height: 100px;
+    resize: vertical;
   }
 
   form button {
@@ -172,4 +237,185 @@ body {
 
   form button:hover {
     background-color: #2b4463;
+  }
+
+  .task-card.urgente {
+    border: 0px solid #ff4444;
+    background-color: #fff5f5;
+  }
+
+  .task-card.urgente .task-title {
+    color: #ff4444;
+    font-weight: bold;
+  }
+
+  #lista-tarefas {
+    padding-bottom: 100px;
+  }
+
+  #prazo {
+    width: 80%;
+    max-width: 400px;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  .checkbox-container {
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  .checkbox-container input[type="checkbox"] {
+    width: auto;
+    margin-right: 5px;
+  }
+
+  .checkbox-container label {
+    color: #444;
+  }
+
+  /* Adicionar animação pulsante para tarefas atrasadas */
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+
+  .task-card.urgente .urgent:contains("ATRASADA") {
+    background: #d32f2f;
+    animation: pulse 2s infinite;
+  }
+
+  .prazo-texto {
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  .description.active + .prazo-texto {
+    position: static;
+    text-align: right;
+    padding: 10px 15px 5px 0;
+    margin-top: 5px;
+  }
+
+  /* Estilos para autenticação */
+  #auth-container {
+    display: flex; /* Começa visível */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f8f9fc;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+  }
+
+  .auth-box {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    width: 90%;
+    max-width: 400px;
+  }
+
+  .auth-logo {
+    width: 180px;
+    margin: 0 auto 40px;
+    display: block;
+  }
+
+  .input-group {
+    margin-bottom: 24px;
+  }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666;
+    font-size: 0.9em;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+  }
+
+  .input-group input:focus {
+    outline: none;
+    border-color: #6c7cff;
+  }
+
+  .forgot-password {
+    display: block;
+    text-align: right;
+    color: #6c7cff;
+    text-decoration: none;
+    font-size: 0.9em;
+    margin: -12px 0 24px;
+  }
+
+  .auth-button {
+    width: 100%;
+    padding: 14px;
+    background: #6c7cff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .auth-button:hover {
+    background: #5a68ff;
+  }
+
+  .register-text {
+    text-align: center;
+    margin-top: 24px;
+    color: #666;
+    font-size: 0.9em;
+  }
+
+  .register-text a {
+    color: #6c7cff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .register-text a:hover {
+    text-decoration: underline;
+  }
+
+  #register-section {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  #register-section.show {
+    display: block;
+    opacity: 1;
+  }
+
+  #login-section {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  #login-section.hide {
+    display: none;
+    opacity: 0;
   }
