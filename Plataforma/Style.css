@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background: #d3d3d3;
+    background: #efefef;
     margin: 0;
     padding: 0;
     text-align: center;
@@ -13,7 +13,8 @@ body {
   }
 
   .task-card {
-    background: #f0f0f0;
+    box-shadow: 0px 0px 10px 0.1px rgba(0, 0, 0, 0.087);
+    background: var(--background);
     margin: 20px auto;
     padding: 30px;
     border-radius: 20px;
@@ -25,6 +26,7 @@ body {
     overflow: hidden; /* Garante que o conteúdo não vaze durante a animação */
     opacity: 1;
     transform: translateY(0);
+
   }
 
   .task-card.hidden {
@@ -33,11 +35,12 @@ body {
   }
 
   .urgent {
+    border-radius: 15px;
     background: #ff4444;
     color: white;
     font-weight: bold;
-    padding: 5px 10px;
-    margin: -20px -20px 10px -20px;
+    padding: 8px 10px;
+    margin: -30px -50px 20px -40px;
     text-align: center;
   }
 
@@ -62,7 +65,7 @@ body {
     right: 20px;
     top: 55px;
     transform: translateY(-50%);
-    background: white;
+    background: rgb(245, 245, 245);
     border-radius: 50%;
     border: none;
     width: 30px;
@@ -80,7 +83,7 @@ body {
 
   .description {
     clear: both;
-    background: rgb(203, 203, 203);
+    background: rgb(238, 238, 238);
     border-radius: 10px;
     font-size: 0.95em;
     color: #444;
@@ -118,7 +121,7 @@ body {
   .bottom-menu {
     display: flex;
     justify-content: space-around;
-    background: white;
+    background: var(--background);
     position: fixed;
     bottom: 0;
     left: 0;
@@ -132,7 +135,7 @@ body {
 
   .bottom-menu button {
     margin: 10px;
-    background: #34527a;
+    background: var(--main-color);
     color: white;
     border: none;
     border-radius: 50%;
@@ -146,11 +149,11 @@ body {
   }
 
   .bottom-menu button:hover{
-    background: #2b4463;
+    background: var(--main-hover);
     scale: 1.05;
   }
   .bottom-menu button:active {
-    background: #1e2a4d;
+    background: var(--main-hover);
     scale: 0.9;
   }
 
@@ -170,7 +173,7 @@ body {
 
   #nova-tarefa, #configuracoes {
     padding: 30px;
-    background: #f0f0f0;
+    background: var(--background);
     border-radius: 20px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     margin: 0 auto;
@@ -228,15 +231,16 @@ body {
   }
 
   form button {
-    background-color: #34527a;
+    background-color: var(--main-color);
     color: white;
     border: none;
     border-radius: 10px;
     cursor: pointer;
+    transition: color 0.3s ease, background-color 0.2s ease;
   }
 
   form button:hover {
-    background-color: #2b4463;
+    background-color: var(--main-hover);
   }
 
   .task-card.urgente {
@@ -354,13 +358,13 @@ body {
 
   .input-group input:focus {
     outline: none;
-    border-color: #6c7cff;
+    border-color: var(--main-color);
   }
 
   .forgot-password {
     display: block;
     text-align: right;
-    color: #6c7cff;
+    color: var(--main-color);
     text-decoration: none;
     font-size: 0.9em;
     margin: -12px 0 24px;
@@ -369,7 +373,7 @@ body {
   .auth-button {
     width: 100%;
     padding: 14px;
-    background: #6c7cff;
+    background: var(--main-color);
     color: white;
     border: none;
     border-radius: 8px;
@@ -379,7 +383,7 @@ body {
   }
 
   .auth-button:hover {
-    background: #5a68ff;
+    background: var(--main-hover);
   }
 
   .register-text {
@@ -390,7 +394,7 @@ body {
   }
 
   .register-text a {
-    color: #6c7cff;
+    color: var(--main-color);
     text-decoration: none;
     font-weight: 500;
   }

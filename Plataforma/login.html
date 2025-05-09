@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - Gerenciador de Tarefas</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Gerenciador de Tarefas</title>
+  
+    <!-- Ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+  
+    <!-- Preload dos estilos -->
+    <link rel="preload" href="/Plataforma/Style.css" as="style" />
+    <link rel="preload" href="/Theme.css" as="style" />
+  
+    <!-- Aplicação dos estilos -->
+    <link rel="stylesheet" href="/Plataforma/Style.css" />
+    <link rel="stylesheet" href="/Theme.css" />
+  </head>
+  
 <body class="auth-page">
   <!-- Container de Autenticação -->
   <div id="auth-container">
     <div class="auth-box">
-      <img src="logo.png" alt="Logo" class="auth-logo">
+      <img src="/Img/Tootalist logo.png" alt="Logo" class="auth-logo">
       
       <!-- Formulário de Login -->
       <div id="login-section">
@@ -29,7 +39,7 @@
         </form>
         <p class="register-text">
           Ainda não possui conta? 
-          <a href="#" onclick="toggleAuthForms()">Conheça o email da Umbler!</a>
+          <a href="#" onclick="toggleAuthForms()">Crie sua conta!</a>
         </p>
       </div>
 

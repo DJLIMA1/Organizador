@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (isLoginPage) {
       if (user) {
-        window.location.href = 'index.html';
+        window.location.href = 'https://tootalist.com/Login';
       }
     } else {
       if (!user) {
-        window.location.href = 'login.html';
+        window.location.href = 'https://tootalist.com/Login';
       } else {
         showMainContent();
         loadTasks().then(() => {
@@ -79,7 +79,7 @@ function registerUser(email, password) {
     .then((userCredential) => {
       const user = userCredential.user;
       console.log('Usuário registrado:', user);
-      window.location.href = 'index.html';
+      window.location.href = 'https://tootalist.com/plataforma';
     })
     .catch((error) => {
       console.error('Erro no registro:', error);
@@ -107,7 +107,7 @@ function loginUser(email, password) {
     .then((userCredential) => {
       const user = userCredential.user;
       console.log('Usuário logado:', user);
-      window.location.href = 'index.html';
+      window.location.href = 'https://tootalist.com/plataforma';
     })
     .catch((error) => {
       console.error('Erro no login:', error);
@@ -138,7 +138,7 @@ function logoutUser() {
   auth.signOut()
     .then(() => {
       console.log('Usuário deslogado');
-      window.location.href = 'login.html';
+      window.location.href = 'https://tootalist.com/Login';
     })
     .catch((error) => {
       console.error('Erro ao deslogar:', error);
